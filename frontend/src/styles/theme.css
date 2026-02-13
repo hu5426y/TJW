@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap');
+
+:root {
+  --bg-main: #f3efe3;
+  --bg-panel: #fffaf0;
+  --ink-1: #1f2a2c;
+  --ink-2: #4b5a5b;
+  --line: #d8ccb8;
+  --brand: #0f766e;
+  --brand-2: #14532d;
+  --accent: #b45309;
+  --danger: #b91c1c;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --shadow: 0 14px 40px rgba(52, 45, 30, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  color: var(--ink-1);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(180, 83, 9, 0.2), transparent 40%),
+    radial-gradient(circle at 86% 82%, rgba(15, 118, 110, 0.16), transparent 42%),
+    linear-gradient(160deg, #f6f1e7 0%, #f3efe3 50%, #efe7da 100%);
+}
+
+h1,
+h2,
+h3,
+.brand-text {
+  font-family: 'ZCOOL XiaoWei', serif;
+  letter-spacing: 0.6px;
+}
+
+.page-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  background: var(--bg-panel);
+}
+
+.soft-chip {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 30%, white);
+  background: color-mix(in srgb, var(--brand) 8%, white);
+  color: var(--brand);
+  font-size: 12px;
+  padding: 3px 10px;
+  font-weight: 600;
+}
