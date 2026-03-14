@@ -1,45 +1,79 @@
-version: '3.9'
 services:
   mysql:
     image: mysql:8.0
     container_name: eldercare-mysql
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root1234
       MYSQL_DATABASE: eldercare
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     command: --default-authentication-plugin=mysql_native_password
     volumes:
+      - mysql-data:/var/lib/mysql
       - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
       - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/2_data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
     container_name: eldercare-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
 
   backend:
     image: maven:3.9-eclipse-temurin-17
     container_name: eldercare-backend
+    restart: unless-stopped
     working_dir: /app
     volumes:
       - ./backend:/app
-    command: mvn spring-boot:run
+      - maven-cache:/root/.m2
+    command: ["mvn", "spring-boot:run"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/eldercare?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root1234
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
     image: node:20-alpine
     container_name: eldercare-frontend
+    restart: unless-stopped
     working_dir: /app
     volumes:
       - ./frontend:/app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+      - frontend-node-modules:/app/node_modules
+    command: ["sh", "./scripts/docker-dev-entrypoint.sh"]
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8080
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+
+volumes:
+  mysql-data:
+  maven-cache:
+  frontend-node-modules:
