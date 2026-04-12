@@ -1,31 +1,39 @@
 <template>
-  <div>
-    <PageHeader title="我的预约" description="只展示当前账号发起或关联的预约记录，便于快速跟踪服务进度。">
+  <div class="page-wrap">
+    <PageHeader title="我的预约" description="只展示当前账号发起或关联的预约记录，方便快速查看进度与服务结果。">
       <el-select v-model="statusFilter" placeholder="全部状态" clearable style="width: 160px">
         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <el-button :loading="loading" @click="loadData">刷新</el-button>
     </PageHeader>
 
-    <el-row :gutter="14" style="margin-bottom: 14px">
-      <el-col :md="6" :sm="12" :xs="24"><StatCard label="我的预约数" :value="myBookings.length" hint="当前账号可见的预约记录" /></el-col>
-      <el-col :md="6" :sm="12" :xs="24"><StatCard label="待服务" :value="pendingCount" hint="包含待接单与已派单工单" /></el-col>
-      <el-col :md="6" :sm="12" :xs="24"><StatCard label="即将上门" :value="upcomingCount" hint="预约时间晚于当前时间" /></el-col>
-      <el-col :md="6" :sm="12" :xs="24"><StatCard label="已完成" :value="completedCount" hint="已形成闭环的服务记录" /></el-col>
+    <el-row :gutter="14">
+      <el-col :md="6" :sm="12" :xs="24">
+        <StatCard label="我的预约数" :value="myBookings.length" hint="当前账号可见的全部预约记录" icon="solar:calendar-mark-bold" badge="预约" />
+      </el-col>
+      <el-col :md="6" :sm="12" :xs="24">
+        <StatCard label="待服务" :value="pendingCount" hint="包含待接单、已分配和服务中" icon="solar:clock-circle-bold" badge="跟进" icon-bg="rgba(193, 125, 45, 0.16)" />
+      </el-col>
+      <el-col :md="6" :sm="12" :xs="24">
+        <StatCard label="即将上门" :value="upcomingCount" hint="预约时间晚于当前时间" icon="solar:map-point-bold" badge="提醒" icon-bg="rgba(59, 130, 246, 0.14)" />
+      </el-col>
+      <el-col :md="6" :sm="12" :xs="24">
+        <StatCard label="已完成" :value="completedCount" hint="已经形成闭环的服务记录" icon="solar:medal-ribbons-star-bold" badge="闭环" icon-bg="rgba(34, 197, 94, 0.14)" />
+      </el-col>
     </el-row>
 
     <section class="next-card page-card">
       <div>
-        <p class="soft-chip">下一个重点预约</p>
+        <p class="section-eyebrow">Next Booking</p>
         <h3>{{ nextBooking ? nextBooking.serviceTitle : '暂无待执行预约' }}</h3>
         <p class="sub">
-          {{ nextBooking ? `${formatDateTime(nextBooking.appointmentTime)} · ${statusLabel(nextBooking.status)}` : '你可以从服务广场发起新的预约。' }}
+          {{ nextBooking ? `${formatDateTime(nextBooking.appointmentTime)} · ${statusLabel(nextBooking.status)}` : '你可以从服务广场继续发起新的预约。' }}
         </p>
       </div>
       <el-tag v-if="nextBooking" :type="statusType(nextBooking.status)" effect="dark">{{ statusLabel(nextBooking.status) }}</el-tag>
     </section>
 
-    <div v-if="filteredBookings.length" class="booking-grid">
+    <div v-if="filteredBookings.length" class="booking-grid" v-auto-animate>
       <article v-for="item in filteredBookings" :key="item.id" class="booking-card page-card">
         <div class="card-top">
           <div>
@@ -36,32 +44,39 @@
         </div>
 
         <div class="info-grid">
-          <div>
+          <div class="surface-soft">
             <span>预约时间</span>
             <strong>{{ formatDateTime(item.appointmentTime) }}</strong>
           </div>
-          <div>
-            <span>发起身份</span>
+          <div class="surface-soft">
+            <span>预约身份</span>
             <strong>{{ bookingOwner(item) }}</strong>
           </div>
         </div>
 
-        <div class="trace-box">
+        <div class="trace-box surface-soft">
           <span>流程轨迹</span>
-          <p>{{ item.fullTrace || '系统暂未生成轨迹' }}</p>
+          <p>{{ item.fullTrace || '系统暂未生成流程轨迹' }}</p>
         </div>
       </article>
     </div>
 
-    <el-empty v-else description="当前筛选条件下暂无预约记录" class="page-card empty-state" />
+    <SharedEmptyState
+      v-else
+      title="暂无预约记录"
+      description="当前筛选条件下还没有符合条件的预约，可以从服务广场继续发起新的预约。"
+      icon="solar:calendar-mark-bold"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import http from '../api/http'
 import { useSession } from '../stores/session'
 import PageHeader from '../components/PageHeader.vue'
+import SharedEmptyState from '../components/SharedEmptyState.vue'
 import StatCard from '../components/StatCard.vue'
 
 const { session } = useSession()
@@ -72,7 +87,7 @@ const statusFilter = ref('')
 
 const statusOptions = [
   { label: '待接单', value: 'PENDING' },
-  { label: '已派单', value: 'ASSIGNED' },
+  { label: '已分配', value: 'ASSIGNED' },
   { label: '服务中', value: 'PROCESSING' },
   { label: '已完成', value: 'COMPLETED' }
 ]
@@ -109,7 +124,7 @@ const nextBooking = computed(() => myBookings.value.find((item) => toTimestamp(i
 
 function bookingOwner(item) {
   if (item.familyId === session.userId) {
-    return '家属协同预约'
+    return '家属代约'
   }
   return '本人预约'
 }
@@ -117,7 +132,7 @@ function bookingOwner(item) {
 function statusLabel(status) {
   return {
     PENDING: '待接单',
-    ASSIGNED: '已派单',
+    ASSIGNED: '已分配',
     PROCESSING: '服务中',
     COMPLETED: '已完成'
   }[status] || status
@@ -162,14 +177,19 @@ loadData()
 </script>
 
 <style scoped>
+.page-wrap {
+  display: grid;
+  gap: 16px;
+}
+
 .next-card {
-  margin-bottom: 16px;
   padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   background: linear-gradient(135deg, rgba(20, 83, 45, 0.08), rgba(255, 250, 240, 0.98));
+  animation: card-in 0.45s ease both;
 }
 
 .next-card h3,
@@ -186,12 +206,18 @@ loadData()
 
 .booking-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
 }
 
 .booking-card {
   padding: 18px;
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.booking-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
 }
 
 .card-top {
@@ -216,8 +242,7 @@ loadData()
 .info-grid div,
 .trace-box {
   padding: 12px;
-  border-radius: 12px;
-  background: rgba(148, 163, 184, 0.08);
+  border-radius: 14px;
 }
 
 .info-grid strong,
@@ -231,8 +256,16 @@ loadData()
   line-height: 1.6;
 }
 
-.empty-state {
-  padding: 24px 0;
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 720px) {

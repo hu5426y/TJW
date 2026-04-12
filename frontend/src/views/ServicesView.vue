@@ -1,17 +1,20 @@
 <template>
-  <div>
-    <PageHeader title="服务广场" description="老人和家属可浏览服务并直接发起预约。" />
+  <div class="page-wrap">
+    <PageHeader title="服务广场" description="老人和家属可以在这里浏览服务、比较分类与价格，并直接发起预约。" />
 
-    <el-row :gutter="14">
-      <el-col v-for="item in services" :key="item.id" :lg="8" :md="12" :sm="24">
-        <el-card class="service-card page-card" shadow="never">
-          <h3>{{ item.title }}</h3>
-          <p class="muted">{{ item.category }} · ￥{{ item.price }}</p>
-          <p class="desc">{{ item.description }}</p>
-          <el-button type="primary" @click="openBooking(item)">立即预约</el-button>
-        </el-card>
-      </el-col>
-    </el-row>
+    <div class="service-grid">
+      <article v-for="item in services" :key="item.id" class="service-card page-card">
+        <div class="service-top">
+          <div>
+            <p class="soft-chip">{{ item.category }}</p>
+            <h3>{{ item.title }}</h3>
+          </div>
+          <strong class="price">¥{{ item.price }}</strong>
+        </div>
+        <p class="desc">{{ item.description }}</p>
+        <el-button type="primary" @click="openBooking(item)">立即预约</el-button>
+      </article>
+    </div>
 
     <el-dialog v-model="dialogVisible" title="发起预约" width="520px">
       <el-form label-position="top">
@@ -85,22 +88,42 @@ loadServices()
 </script>
 
 <style scoped>
+.page-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
 .service-card {
-  margin-bottom: 14px;
+  padding: 18px;
   background: linear-gradient(145deg, rgba(20, 83, 45, 0.08), rgba(255, 255, 255, 0.95));
 }
 
+.service-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 h3 {
-  margin: 0;
+  margin: 12px 0 0;
   font-size: 22px;
 }
 
-.muted {
-  margin: 6px 0;
-  color: var(--ink-2);
+.price {
+  font-size: 26px;
+  color: var(--brand-strong);
 }
 
 .desc {
-  min-height: 40px;
+  min-height: 48px;
+  color: var(--ink-2);
+  line-height: 1.7;
 }
 </style>

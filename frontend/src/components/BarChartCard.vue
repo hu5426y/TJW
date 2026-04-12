@@ -2,30 +2,26 @@
   <section class="chart-card page-card">
     <div class="chart-head">
       <div>
-        <p class="eyebrow">图表视图</p>
+        <p class="section-eyebrow">Data View</p>
         <h3>{{ title }}</h3>
       </div>
       <p class="desc">{{ description }}</p>
     </div>
 
     <el-empty v-if="normalizedItems.length === 0" description="暂无可展示数据" />
-
-    <div v-else class="rows">
-      <div v-for="(item, index) in normalizedItems" :key="item.label" class="row">
-        <div class="meta">
-          <span>{{ item.label }}</span>
-          <strong>{{ item.value }}</strong>
-        </div>
-        <div class="track">
-          <div class="fill" :style="{ width: `${item.percent}%`, background: item.color || palette[index % palette.length] }"></div>
-        </div>
-      </div>
-    </div>
+    <VChart v-else class="chart" :option="option" autoresize />
   </section>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import VChart from 'vue-echarts'
+import { use } from 'echarts/core'
+import { BarChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+use([CanvasRenderer, BarChart, GridComponent, TooltipComponent])
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -36,17 +32,60 @@ const props = defineProps({
   }
 })
 
-const palette = ['#0f766e', '#b45309', '#14532d', '#0ea5e9', '#dc2626']
+const palette = ['#0f766e', '#c17d2d', '#2f6f68', '#59908a', '#d97706', '#1d4ed8']
 
-const normalizedItems = computed(() => {
-  const values = props.items.map((item) => Number(item.value) || 0)
-  const maxValue = Math.max(1, ...values)
+const normalizedItems = computed(() =>
+  props.items
+    .map((item) => ({
+      label: item.label,
+      value: Number(item.value) || 0
+    }))
+    .sort((left, right) => right.value - left.value)
+)
 
-  return props.items.map((item) => ({
-    ...item,
-    percent: item.value > 0 ? Math.max(8, Math.round((item.value / maxValue) * 100)) : 0
-  }))
-})
+const option = computed(() => ({
+  animationDuration: 900,
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: { type: 'shadow' }
+  },
+  grid: {
+    top: 16,
+    left: 8,
+    right: 8,
+    bottom: 0,
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    data: normalizedItems.value.map((item) => item.label),
+    axisTick: { show: false },
+    axisLine: { lineStyle: { color: 'rgba(83, 101, 99, 0.28)' } },
+    axisLabel: {
+      color: '#536563',
+      interval: 0,
+      rotate: normalizedItems.value.length > 4 ? 16 : 0
+    }
+  },
+  yAxis: {
+    type: 'value',
+    splitLine: { lineStyle: { color: 'rgba(83, 101, 99, 0.12)' } },
+    axisLabel: { color: '#536563' }
+  },
+  series: [
+    {
+      type: 'bar',
+      barMaxWidth: 42,
+      data: normalizedItems.value.map((item, index) => ({
+        value: item.value,
+        itemStyle: {
+          color: palette[index % palette.length],
+          borderRadius: [10, 10, 0, 0]
+        }
+      }))
+    }
+  ]
+}))
 </script>
 
 <style scoped>
@@ -57,14 +96,7 @@ const normalizedItems = computed(() => {
 .chart-head {
   display: grid;
   gap: 8px;
-  margin-bottom: 18px;
-}
-
-.eyebrow {
-  margin: 0 0 4px;
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 h3 {
@@ -78,34 +110,7 @@ h3 {
   line-height: 1.6;
 }
 
-.rows {
-  display: grid;
-  gap: 14px;
-}
-
-.row {
-  display: grid;
-  gap: 8px;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-}
-
-.track {
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.14);
-  overflow: hidden;
-}
-
-.fill {
-  height: 100%;
-  border-radius: inherit;
-  transition: width 0.3s ease;
+.chart {
+  height: 300px;
 }
 </style>
