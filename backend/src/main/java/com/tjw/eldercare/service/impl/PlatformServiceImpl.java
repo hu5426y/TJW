@@ -67,11 +67,21 @@ public class PlatformServiceImpl implements PlatformService {
     }
 
     @Override
+    public List<HealthRecord> listHealthRecords() {
+        return healthRecordMapper.selectList(new LambdaQueryWrapper<HealthRecord>().orderByDesc(HealthRecord::getRecordTime));
+    }
+
+    @Override
     public void emergency(EmergencyCall emergencyCall) {
         emergencyCall.setCreatedAt(LocalDateTime.now());
         emergencyCall.setStatus("PROCESSING");
         emergencyCallMapper.insert(emergencyCall);
         messagingTemplate.convertAndSend("/topic/emergency", "收到新的紧急呼叫，位置：" + emergencyCall.getLocation());
+    }
+
+    @Override
+    public List<EmergencyCall> listEmergencies() {
+        return emergencyCallMapper.selectList(new LambdaQueryWrapper<EmergencyCall>().orderByDesc(EmergencyCall::getCreatedAt));
     }
 
     @Override

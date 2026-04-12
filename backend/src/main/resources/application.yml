@@ -1,9 +1,14 @@
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/eldercare?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/eldercare?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -11,6 +16,10 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
+  sql:
+    init:
+      encoding: UTF-8
+      mode: always
   jackson:
     time-zone: Asia/Shanghai
 

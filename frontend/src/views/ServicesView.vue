@@ -33,10 +33,12 @@
 <script setup>
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 import http from '../api/http'
 import { useSession } from '../stores/session'
 import PageHeader from '../components/PageHeader.vue'
 
+const router = useRouter()
 const { session } = useSession()
 const services = ref([])
 const dialogVisible = ref(false)
@@ -71,6 +73,7 @@ async function submitBooking() {
     })
     ElMessage.success('预约已提交')
     dialogVisible.value = false
+    router.push('/my-bookings')
   } catch (err) {
     ElMessage.error(err.response?.data?.message || '预约失败')
   } finally {

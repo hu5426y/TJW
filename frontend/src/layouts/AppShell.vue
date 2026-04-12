@@ -13,6 +13,7 @@
       <div class="footer">
         <p class="soft-chip">{{ roleText }}</p>
         <p class="user">{{ session.realName || session.username }}</p>
+        <p class="hint">{{ roleHint }}</p>
         <el-button type="danger" plain @click="logout">退出登录</el-button>
       </div>
     </aside>
@@ -34,8 +35,9 @@ const { session, clearSession } = useSession()
 const menus = [
   { path: '/overview', label: '运营总览', roles: ['ELDER', 'FAMILY', 'PROVIDER', 'ADMIN'] },
   { path: '/services', label: '服务广场', roles: ['ELDER', 'FAMILY'] },
+  { path: '/my-bookings', label: '我的预约', roles: ['ELDER', 'FAMILY'] },
   { path: '/provider-services', label: '服务发布', roles: ['PROVIDER', 'ADMIN'] },
-  { path: '/bookings', label: '预约工单', roles: ['ELDER', 'FAMILY', 'PROVIDER', 'ADMIN'] },
+  { path: '/bookings', label: '履约工单', roles: ['PROVIDER', 'ADMIN'] },
   { path: '/health', label: '健康监测', roles: ['ELDER', 'FAMILY', 'ADMIN'] },
   { path: '/emergency', label: '应急处置', roles: ['ELDER', 'ADMIN'] },
   { path: '/complaints', label: '投诉质控', roles: ['ELDER', 'FAMILY', 'ADMIN'] }
@@ -48,7 +50,15 @@ const roleMap = {
   ADMIN: '管理端'
 }
 
+const roleHintMap = {
+  ELDER: '预约、健康、应急一屏联动',
+  FAMILY: '跟踪家人预约与服务闭环',
+  PROVIDER: '关注派单节奏与上门履约',
+  ADMIN: '查看全局运行与图表化态势'
+}
+
 const roleText = computed(() => roleMap[session.role] || '未识别角色')
+const roleHint = computed(() => roleHintMap[session.role] || '请选择正确角色登录')
 const visibleMenus = computed(() => menus.filter((item) => item.roles.includes(session.role)))
 
 function logout() {
@@ -101,6 +111,13 @@ function logout() {
 .user {
   margin: 0;
   font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .main {

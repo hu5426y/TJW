@@ -169,7 +169,7 @@ mvn spring-boot:run
 如果本机 MySQL 账号不是默认的 `root / root1234`，请先设置环境变量：
 
 ```bash
-export SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3306/eldercare?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai'
+export SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3306/eldercare?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai'
 export SPRING_DATASOURCE_USERNAME='你的 MySQL 用户名'
 export SPRING_DATASOURCE_PASSWORD='你的 MySQL 密码'
 export SPRING_DATA_REDIS_HOST='localhost'

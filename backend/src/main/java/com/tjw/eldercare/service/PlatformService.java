@@ -11,7 +11,9 @@ public interface PlatformService {
     List<Booking> listBookings();
     void saveHealthRecord(HealthRecord healthRecord);
     List<HealthRecord> listHealthRecords(Long elderId);
+    List<HealthRecord> listHealthRecords();
     void emergency(EmergencyCall emergencyCall);
+    List<EmergencyCall> listEmergencies();
     void submitComplaint(Complaint complaint);
     List<Complaint> listComplaints();
 }

@@ -26,7 +26,7 @@
             <el-table-column prop="bloodOxygen" label="血氧" width="80" />
             <el-table-column label="风险级别" width="120">
               <template #default="{ row }">
-                <el-tag :type="row.warningLevel === 'HIGH' ? 'danger' : 'success'">{{ row.warningLevel }}</el-tag>
+                <el-tag :type="row.warningLevel === 'HIGH' ? 'danger' : 'success'">{{ warningLabelMap[row.warningLevel] || row.warningLevel }}</el-tag>
               </template>
             </el-table-column>
           </el-table>
@@ -46,9 +46,14 @@ import PageHeader from '../components/PageHeader.vue'
 const { session } = useSession()
 const submitting = ref(false)
 const records = ref([])
+const defaultElderId = session.role === 'ELDER' ? session.userId : 1
+const warningLabelMap = {
+  HIGH: '高风险',
+  NORMAL: '正常'
+}
 
 const form = reactive({
-  elderId: session.userId || 1,
+  elderId: defaultElderId,
   systolic: 120,
   diastolic: 80,
   heartRate: 75,

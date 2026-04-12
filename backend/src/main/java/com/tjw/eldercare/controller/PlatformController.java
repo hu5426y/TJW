@@ -50,11 +50,23 @@ public class PlatformController {
         return ApiResponse.success(platformService.listHealthRecords(elderId));
     }
 
+    @GetMapping("/health")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<HealthRecord>> listAllHealth() {
+        return ApiResponse.success(platformService.listHealthRecords());
+    }
+
     @PostMapping("/emergency")
     @PreAuthorize("hasRole('ELDER')")
     public ApiResponse<String> emergency(@RequestBody EmergencyCall emergencyCall) {
         platformService.emergency(emergencyCall);
         return ApiResponse.success("紧急呼叫已发送");
+    }
+
+    @GetMapping("/emergency")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<EmergencyCall>> emergencies() {
+        return ApiResponse.success(platformService.listEmergencies());
     }
 
     @PostMapping("/complaints")

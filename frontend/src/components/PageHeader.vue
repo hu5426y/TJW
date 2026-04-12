@@ -20,8 +20,9 @@ defineProps({
 <style scoped>
 .header-wrap {
   display: flex;
-  align-items: start;
+  align-items: end;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -39,6 +40,8 @@ defineProps({
 .right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
 }
 </style>
