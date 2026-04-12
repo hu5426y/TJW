@@ -35,20 +35,42 @@ pick_port() {
   fi
 }
 
+pick_first_free_port() {
+  local start="$1"
+  local end="$2"
+  local provided="${3:-}"
+  local port
+
+  if [[ -n "$provided" ]]; then
+    printf '%s\n' "$provided"
+    return
+  fi
+
+  for port in $(seq "$start" "$end"); do
+    if ! port_in_use "$port"; then
+      printf '%s\n' "$port"
+      return
+    fi
+  done
+
+  printf 'No free port available in range %s-%s\n' "$start" "$end" >&2
+  return 1
+}
+
 pick_backend_port() {
-  pick_port 8080 8081 "${SERVER_PORT:-}"
+  pick_first_free_port 8080 8090 "${SERVER_PORT:-}"
 }
 
 pick_frontend_port() {
-  pick_port 5173 5174 "${VITE_DEV_PORT:-}"
+  pick_first_free_port 5173 5185 "${VITE_DEV_PORT:-}"
 }
 
 pick_mysql_port() {
-  pick_port 3306 3307 "${MYSQL_PORT:-}"
+  pick_first_free_port 3306 3315 "${MYSQL_PORT:-}"
 }
 
 pick_redis_port() {
-  pick_port 6379 6380 "${REDIS_PORT:-}"
+  pick_first_free_port 6379 6388 "${REDIS_PORT:-}"
 }
 
 wait_for_http() {

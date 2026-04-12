@@ -46,6 +46,7 @@ export default defineConfig({
   },
   server: {
     port: devPort,
+    strictPort: true,
     proxy: {
       '/api': {
         target: proxyTarget,
